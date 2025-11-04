@@ -80,7 +80,9 @@ export default function ProfileHeader({ profile, onProfileUpdate }: ProfileHeade
   const fullName = profile.isOwnProfile
     ? clerkUser?.fullName || profile.name
     : null; // 다른 사용자는 일단 name만 표시
-  const bio = profile.isOwnProfile ? clerkUser?.publicMetadata?.bio : null; // 향후 확장
+  const bio = profile.isOwnProfile 
+    ? (clerkUser?.publicMetadata?.bio as string | undefined) || null 
+    : null; // 향후 확장
 
   return (
     <div className="w-full max-w-[935px] mx-auto px-4 py-6 md:py-8">

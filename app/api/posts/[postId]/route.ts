@@ -142,15 +142,30 @@ export async function GET(
       console.error("댓글 조회 에러:", commentsError);
     }
 
-    const comments = (commentsData || []).map((comment) => ({
-      id: comment.id,
-      post_id: comment.post_id,
-      user_id: comment.user_id,
-      content: comment.content,
-      created_at: comment.created_at,
-      updated_at: comment.updated_at,
-      user: comment.user as { id: string; name: string; clerk_id: string },
-    }));
+    const comments = (commentsData || []).map((comment: any) => {
+      // Supabase JOIN 결과 처리 (배열 또는 단일 객체)
+      let userData: { id: string; name: string; clerk_id: string } | null = null;
+      
+      if (Array.isArray(comment.user)) {
+        userData = comment.user[0] || null;
+      } else if (comment.user) {
+        userData = comment.user;
+      }
+      
+      return {
+        id: comment.id,
+        post_id: comment.post_id,
+        user_id: comment.user_id,
+        content: comment.content,
+        created_at: comment.created_at,
+        updated_at: comment.updated_at,
+        user: {
+          id: String(userData?.id || ''),
+          name: String(userData?.name || ''),
+          clerk_id: String(userData?.clerk_id || ''),
+        },
+      };
+    });
 
     // 현재 사용자가 이 게시물을 좋아요했는지 확인
     let isLiked = false;
@@ -165,6 +180,14 @@ export async function GET(
       isLiked = !!likeData;
     }
 
+    // user 데이터 처리 (배열 또는 단일 객체)
+    let userData: { id: string; clerk_id: string; name: string } | null = null;
+    if (Array.isArray(postData.user)) {
+      userData = postData.user[0] || null;
+    } else if (postData.user) {
+      userData = postData.user;
+    }
+
     const post: PostWithComments = {
       id: postData.id,
       user_id: postData.user_id,
@@ -172,7 +195,12 @@ export async function GET(
       caption: postData.caption,
       created_at: postData.created_at,
       updated_at: postData.updated_at,
-      user: postData.user as { id: string; clerk_id: string; name: string },
+      user: {
+        id: String(userData?.id || ''),
+        clerk_id: String(userData?.clerk_id || ''),
+        name: String(userData?.name || ''),
+        created_at: postData.created_at, // User 타입에 required이므로 추가
+      },
       likes_count: likesCount || 0,
       comments_count: commentsCount || 0,
       comments: comments,

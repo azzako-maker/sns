@@ -32,7 +32,6 @@ import {
   Bookmark,
   MoreHorizontal,
   User,
-  X,
 } from "lucide-react";
 import {
   Dialog,
@@ -60,7 +59,6 @@ export default function PostModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [localComments, setLocalComments] = useState<CommentWithUser[]>([]);
-  const [localCommentsCount, setLocalCommentsCount] = useState(0);
 
   console.group("PostModal 렌더링");
   console.log("postId:", postId);
@@ -90,7 +88,6 @@ export default function PostModal({
         console.log("게시물 상세 정보 조회 성공:", postData);
         setPost(postData);
         setLocalComments(postData.comments || []);
-        setLocalCommentsCount(postData.comments_count);
       } catch (err) {
         console.error("게시물 상세 정보 조회 에러:", err);
         setError(
@@ -115,14 +112,26 @@ export default function PostModal({
   const handleCommentAdded = (newComment: CommentWithUser) => {
     console.log("새 댓글 추가:", newComment);
     setLocalComments((prev) => [...prev, newComment]);
-    setLocalCommentsCount((prev) => prev + 1);
+    // 게시물 댓글 수 업데이트
+    if (post) {
+      setPost({
+        ...post,
+        comments_count: post.comments_count + 1,
+      });
+    }
   };
 
   // 댓글 삭제 핸들러
   const handleCommentDeleted = (commentId: string) => {
     console.log("댓글 삭제:", commentId);
     setLocalComments((prev) => prev.filter((c) => c.id !== commentId));
-    setLocalCommentsCount((prev) => Math.max(0, prev - 1));
+    // 게시물 댓글 수 업데이트
+    if (post) {
+      setPost({
+        ...post,
+        comments_count: Math.max(0, post.comments_count - 1),
+      });
+    }
   };
 
   // 게시물 삭제 핸들러
