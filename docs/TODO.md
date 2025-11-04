@@ -46,22 +46,36 @@ Instagram UI 기반 SNS 프로젝트 개발 체크리스트
 - [x] 기본 데이터베이스 테이블 생성 (users, posts, likes, comments, follows)
 
 ### 1-2. 레이아웃 구조
-- [ ] `components/layout/Sidebar.tsx` 컴포넌트
-  - [ ] Desktop: 244px 너비, 아이콘 + 텍스트
-  - [ ] Tablet: 72px 너비, 아이콘만
-  - [ ] Mobile: 숨김
-  - [ ] 메뉴 항목: 홈, 검색, 만들기, 프로필
-  - [ ] Hover 효과 및 Active 상태 스타일
-- [ ] `components/layout/Header.tsx` 컴포넌트 (Mobile)
-  - [ ] 높이 60px
-  - [ ] 로고 + 알림/DM/프로필 아이콘
-- [ ] `components/layout/BottomNav.tsx` 컴포넌트 (Mobile)
-  - [ ] 높이 50px
-  - [ ] 5개 아이콘: 홈, 검색, 만들기, 좋아요, 프로필
-- [ ] `app/(main)/layout.tsx` 생성
-  - [ ] Sidebar 통합 (Desktop/Tablet)
-  - [ ] Header/BottomNav 통합 (Mobile)
-  - [ ] 반응형 레이아웃 처리
+- [x] `components/layout/Sidebar.tsx` 컴포넌트
+  - [x] Desktop: 244px 너비, 아이콘 + 텍스트
+  - [x] Tablet: 72px 너비, 아이콘만
+  - [x] Mobile: 숨김
+  - [x] 메뉴 항목: 홈, 검색, 만들기, 프로필
+  - [x] Hover 효과 및 Active 상태 스타일
+  - [x] Clerk 인증 상태 연동 (useUser, SignedIn/SignedOut)
+  - [x] 경로별 Active 상태 표시 (usePathname)
+- [x] `components/layout/Header.tsx` 컴포넌트 (Mobile)
+  - [x] 높이 60px
+  - [x] 로고 + 알림/DM/프로필 아이콘
+  - [x] 고정 위치 (상단)
+  - [x] Clerk UserButton 통합
+- [x] `components/layout/BottomNav.tsx` 컴포넌트 (Mobile)
+  - [x] 높이 50px
+  - [x] 5개 아이콘: 홈, 검색, 만들기, 좋아요, 프로필
+  - [x] 고정 위치 (하단)
+  - [x] Active 상태 표시
+  - [x] 인증 필요 메뉴 처리 (SignedIn/SignedOut)
+- [x] `app/(main)/layout.tsx` 생성
+  - [x] Sidebar 통합 (Desktop/Tablet)
+  - [x] Header/BottomNav 통합 (Mobile)
+  - [x] 반응형 레이아웃 처리
+  - [x] Main Content 영역 마진/패딩 설정
+- [x] RootLayout 수정
+  - [x] Navbar 제거
+  - [x] (main) 그룹 구조로 변경
+- [x] 기존 페이지 구조 정리
+  - [x] `app/page.tsx` 삭제 (중복 제거)
+  - [x] `app/(main)/page.tsx` 생성 (기존 페이지 이동)
 
 ### 1-3. 홈 피드 - 게시물 목록
 - [ ] `components/post/PostCard.tsx` 컴포넌트
@@ -299,5 +313,5 @@ Instagram UI 기반 SNS 프로젝트 개발 체크리스트
 
 ---
 
-**마지막 업데이트**: 2025-01-27  
+**마지막 업데이트**: 2025-11-04  
 **기반 문서**: [PRD.md](./prd.md)
