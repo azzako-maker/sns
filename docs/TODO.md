@@ -330,19 +330,19 @@ Instagram UI 기반 SNS 프로젝트 개발 체크리스트
 ## 3️⃣ 3단계: 프로필 페이지 & 팔로우 기능
 
 ### 3-1. 프로필 페이지 - 기본 정보
-- [ ] `app/(main)/profile/[userId]/page.tsx` 동적 라우트
-- [ ] `components/profile/ProfileHeader.tsx` 컴포넌트
-  - [ ] 프로필 이미지 (150px Desktop / 90px Mobile, 원형)
-  - [ ] 사용자명 표시
-  - [ ] 통계: 게시물 수, 팔로워 수, 팔로잉 수
-  - [ ] "팔로우" 또는 "팔로잉" 버튼 (다른 사용자 프로필일 때)
-  - [ ] 본인 프로필일 때: "프로필 편집" 버튼 (1차 제외)
-  - [ ] Fullname 표시
-  - [ ] Bio 표시
-- [ ] `app/api/users/[userId]/route.ts` GET API
-  - [ ] 사용자 정보 조회
-  - [ ] 게시물 수, 팔로워 수, 팔로잉 수 계산
-  - [ ] 팔로우 상태 확인
+- [x] `app/(main)/profile/[userId]/page.tsx` 동적 라우트
+- [x] `components/profile/ProfileHeader.tsx` 컴포넌트
+  - [x] 프로필 이미지 (150px Desktop / 90px Mobile, 원형)
+  - [x] 사용자명 표시
+  - [x] 통계: 게시물 수, 팔로워 수, 팔로잉 수
+  - [x] "팔로우" 또는 "팔로잉" 버튼 (다른 사용자 프로필일 때)
+  - [x] 본인 프로필일 때: "프로필 편집" 버튼 (1차 제외)
+  - [x] Fullname 표시 (Clerk에서 가져오기)
+  - [x] Bio 표시 (향후 확장)
+- [x] `app/api/users/[userId]/route.ts` GET API
+  - [x] 사용자 정보 조회
+  - [x] 게시물 수, 팔로워 수, 팔로잉 수 계산 (user_stats 뷰 사용)
+  - [x] 팔로우 상태 확인
 
 ### 3-2. 프로필 페이지 - 게시물 그리드
 - [ ] `components/profile/PostGrid.tsx` 컴포넌트
@@ -498,4 +498,17 @@ Instagram UI 기반 SNS 프로젝트 개발 체크리스트
   - PostFeed 무한 스크롤 구현 (Intersection Observer)
   - 하단 100px 전에 자동 로딩
   - 로딩 스켈레톤 및 완료 메시지 표시
+  - 상세 로깅 추가
+- ✅ 3-1 프로필 페이지 - 기본 정보 완료
+  - GET /api/users/[userId] API 구현
+  - user_stats 뷰를 사용한 통계 정보 조회
+  - 팔로우 상태 및 본인 프로필 여부 확인
+  - ProfileHeader 컴포넌트 생성 (Instagram 스타일)
+  - 프로필 이미지 (Clerk 이미지 또는 기본 아바타)
+  - 통계 정보 표시 (게시물, 팔로워, 팔로잉)
+  - 팔로우/팔로잉 버튼 (다른 사용자 프로필)
+  - 프로필 편집 버튼 (본인 프로필, 1차 제외로 비활성화)
+  - Fullname 표시 (Clerk에서 가져오기)
+  - 동적 라우트 페이지 구현 (/profile/[userId])
+  - 로딩 스켈레톤 및 에러 처리
   - 상세 로깅 추가

@@ -79,3 +79,14 @@ export interface PostWithComments extends PostWithStats {
   isLiked?: boolean; // 현재 사용자가 좋아요했는지 여부
 }
 
+/**
+ * 프로필 페이지용 사용자 정보 (통계 포함)
+ */
+export interface UserProfile extends User {
+  posts_count: number;
+  followers_count: number;
+  following_count: number;
+  isFollowing?: boolean; // 현재 사용자가 이 사용자를 팔로우하는지 여부
+  isOwnProfile?: boolean; // 본인 프로필인지 여부
+}
+
