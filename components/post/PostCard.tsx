@@ -17,7 +17,7 @@
  * - lib/utils/time: 상대 시간 표시
  */
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { PostWithComments } from "@/lib/types";
 import { formatRelativeTime } from "@/lib/utils/time";
+import { useLike } from "@/hooks/use-like";
 
 interface PostCardProps {
   post: PostWithComments;
@@ -37,17 +38,57 @@ interface PostCardProps {
 
 export default function PostCard({ post }: PostCardProps) {
   const [isCaptionExpanded, setIsCaptionExpanded] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [showDoubleTapHeart, setShowDoubleTapHeart] = useState(false);
+  const lastTapRef = useRef(0);
+
+  // 좋아요 Hook 사용
+  const { isLiked, likesCount, toggleLike, isLoading } = useLike({
+    postId: post.id,
+    initialLiked: post.isLiked || false,
+    initialCount: post.likes_count,
+  });
 
   console.group("PostCard 렌더링");
   console.log("게시물 ID:", post.id);
   console.log("사용자:", post.user.name);
-  console.log("좋아요 수:", post.likes_count);
+  console.log("좋아요 수:", likesCount);
+  console.log("좋아요 상태:", isLiked);
   console.log("댓글 수:", post.comments_count);
   console.groupEnd();
 
   // 캡션이 2줄 초과인지 확인 (대략적인 계산)
   const captionLines = post.caption ? post.caption.length / 30 : 0;
   const showExpandButton = captionLines > 2;
+
+  // 좋아요 버튼 클릭 핸들러
+  const handleLikeClick = async () => {
+    // 클릭 애니메이션 트리거
+    setIsAnimating(true);
+    setTimeout(() => setIsAnimating(false), 150);
+
+    // 좋아요 토글
+    await toggleLike();
+  };
+
+  // 더블탭 감지 (모바일)
+  const handleDoubleTap = (e: React.TouchEvent | React.MouseEvent) => {
+    const currentTime = new Date().getTime();
+    const tapLength = currentTime - lastTapRef.current;
+
+    if (tapLength < 300 && tapLength > 0) {
+      // 더블탭 감지
+      e.preventDefault();
+      if (!isLiked) {
+        toggleLike();
+        // 큰 하트 애니메이션 표시
+        setShowDoubleTapHeart(true);
+        setTimeout(() => setShowDoubleTapHeart(false), 1000);
+      }
+    }
+
+    lastTapRef.current = currentTime;
+  };
 
   return (
     <article className="bg-white border border-[#DBDBDB] rounded-lg mb-4">
@@ -83,7 +124,11 @@ export default function PostCard({ post }: PostCardProps) {
       </header>
 
       {/* 이미지 영역 */}
-      <div className="relative aspect-square w-full bg-gray-100">
+      <div
+        className="relative aspect-square w-full bg-gray-100 cursor-pointer select-none"
+        onTouchEnd={handleDoubleTap}
+        onDoubleClick={handleDoubleTap}
+      >
         <Image
           src={post.image_url}
           alt={post.caption || `${post.user.name}의 게시물`}
@@ -92,6 +137,17 @@ export default function PostCard({ post }: PostCardProps) {
           sizes="(max-width: 768px) 100vw, 630px"
           loading="lazy"
         />
+        {/* 더블탭 큰 하트 애니메이션 */}
+        {showDoubleTapHeart && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+            <Heart
+              className="w-20 h-20 text-[#ED4956] fill-[#ED4956]"
+              style={{
+                animation: "fadeInOut 1s ease-in-out",
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {/* 액션 버튼 영역 (48px) */}
@@ -100,10 +156,18 @@ export default function PostCard({ post }: PostCardProps) {
           {/* 좋아요 버튼 */}
           <button
             type="button"
-            className="text-[#262626] hover:opacity-70 transition-opacity"
-            aria-label="좋아요"
+            onClick={handleLikeClick}
+            disabled={isLoading}
+            className={`transition-all duration-150 ${
+              isLiked
+                ? "text-[#ED4956]"
+                : "text-[#262626] hover:opacity-70"
+            } ${isAnimating ? "scale-125" : "scale-100"}`}
+            aria-label={isLiked ? "좋아요 취소" : "좋아요"}
           >
-            <Heart className="w-6 h-6" />
+            <Heart
+              className={`w-6 h-6 ${isLiked ? "fill-[#ED4956]" : ""}`}
+            />
           </button>
           {/* 댓글 버튼 */}
           <button
@@ -135,9 +199,9 @@ export default function PostCard({ post }: PostCardProps) {
       {/* 컨텐츠 영역 */}
       <div className="px-4 pb-4 space-y-2">
         {/* 좋아요 수 */}
-        {post.likes_count > 0 && (
+        {likesCount > 0 && (
           <div className="font-instagram-bold text-[#262626] text-instagram-sm">
-            좋아요 {post.likes_count.toLocaleString()}개
+            좋아요 {likesCount.toLocaleString()}개
           </div>
         )}
 

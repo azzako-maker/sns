@@ -16,6 +16,7 @@
 import { createClerkSupabaseClient } from "@/lib/supabase/server";
 import { PostsResponse, PostWithComments } from "@/lib/types";
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 
 const POSTS_PER_PAGE = 10;
 
@@ -23,6 +24,24 @@ export async function GET(request: NextRequest) {
   try {
     console.group("게시물 목록 API 호출");
     const supabase = createClerkSupabaseClient();
+
+    // 현재 사용자 ID 가져오기 (Clerk)
+    const { userId: clerkUserId } = await auth();
+    let currentUserId: string | null = null;
+
+    if (clerkUserId) {
+      // users 테이블에서 clerk_id로 user_id 조회
+      const { data: user } = await supabase
+        .from("users")
+        .select("id")
+        .eq("clerk_id", clerkUserId)
+        .single();
+
+      if (user) {
+        currentUserId = user.id;
+        console.log("현재 사용자 ID (Supabase):", currentUserId);
+      }
+    }
 
     // 페이지 파라미터 파싱
     const searchParams = request.nextUrl.searchParams;
@@ -72,7 +91,7 @@ export async function GET(request: NextRequest) {
 
     console.log("조회된 게시물 수:", postsData.length);
 
-    // 각 게시물의 최신 댓글 2개 가져오기
+    // 각 게시물의 최신 댓글 2개 및 좋아요 상태 가져오기
     const postsWithComments: PostWithComments[] = await Promise.all(
       postsData.map(async (postStat) => {
         // 댓글이 있는 경우에만 조회
@@ -112,6 +131,19 @@ export async function GET(request: NextRequest) {
           }
         }
 
+        // 현재 사용자가 이 게시물을 좋아요했는지 확인
+        let isLiked = false;
+        if (currentUserId) {
+          const { data: likeData } = await supabase
+            .from("likes")
+            .select("id")
+            .eq("post_id", postStat.post_id)
+            .eq("user_id", currentUserId)
+            .single();
+
+          isLiked = !!likeData;
+        }
+
         return {
           id: postStat.post_id,
           user_id: postStat.user_id,
@@ -123,6 +155,7 @@ export async function GET(request: NextRequest) {
           likes_count: Number(postStat.likes_count) || 0,
           comments_count: Number(postStat.comments_count) || 0,
           comments: comments,
+          isLiked,
         };
       })
     );

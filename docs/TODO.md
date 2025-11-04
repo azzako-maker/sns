@@ -133,23 +133,43 @@ Instagram UI 기반 SNS 프로젝트 개발 체크리스트
   - [x] 이미지 최적화 설정
 
 ### 1-4. 홈 피드 - 좋아요 기능
-- [ ] `likes` 테이블 마이그레이션 생성
-  - [ ] `user_id` (UUID, FK to users)
-  - [ ] `post_id` (UUID, FK to posts)
-  - [ ] `created_at` (TIMESTAMPTZ)
-  - [ ] UNIQUE 제약조건 (user_id, post_id)
-- [ ] `app/api/likes/route.ts` API
-  - [ ] POST: 좋아요 추가
-  - [ ] DELETE: 좋아요 제거
-- [ ] 좋아요 버튼 기능 구현
-  - [ ] 클릭 시 좋아요 토글
-  - [ ] 빈 하트 ↔ 빨간 하트 전환
-  - [ ] 애니메이션: scale(1.3) → scale(1) (0.15초)
-- [ ] 더블탭 좋아요 기능 (모바일)
-  - [ ] 이미지 더블탭 감지
-  - [ ] 큰 하트 등장 (fade in)
-  - [ ] 1초 후 사라짐 (fade out)
-  - [ ] 좋아요 상태 업데이트
+- [x] `likes` 테이블 확인
+  - [x] `supabase/migrations/sns.sql`에 이미 정의되어 있음
+  - [x] `user_id` (UUID, FK to users)
+  - [x] `post_id` (UUID, FK to posts)
+  - [x] `created_at` (TIMESTAMPTZ)
+  - [x] UNIQUE 제약조건 (user_id, post_id)
+  - [x] 추가 마이그레이션 불필요 (이미 완료)
+- [x] 타입 정의 업데이트 (`lib/types.ts`)
+  - [x] `PostWithComments`에 `isLiked?: boolean` 필드 추가
+- [x] `app/api/likes/route.ts` API
+  - [x] POST: 좋아요 추가 (중복 방지, UNIQUE 제약조건 처리)
+  - [x] DELETE: 좋아요 제거
+  - [x] Clerk 인증 확인
+  - [x] users 테이블에서 clerk_id로 user_id 조회
+  - [x] 에러 핸들링 (401, 404, 500)
+  - [x] 로깅 추가
+- [x] 게시물 목록 API 수정 (`app/api/posts/route.ts`)
+  - [x] 현재 사용자 좋아요 상태 조회 (isLiked)
+  - [x] 각 게시물에 isLiked 필드 포함
+- [x] 좋아요 상태 관리 Hook (`hooks/use-like.ts`)
+  - [x] useLike Hook 생성
+  - [x] Optimistic update (즉시 UI 업데이트)
+  - [x] API 실패 시 롤백 처리
+  - [x] 로딩 및 에러 상태 관리
+- [x] 좋아요 버튼 기능 구현 (`components/post/PostCard.tsx`)
+  - [x] 클릭 시 좋아요 토글 (useLike Hook 사용)
+  - [x] 빈 하트 ↔ 빨간 하트 전환 (fill 속성)
+  - [x] 애니메이션: scale(1.3) → scale(1) (0.15초)
+  - [x] 좋아요 수 실시간 업데이트 (optimistic update)
+  - [x] 클릭 애니메이션 상태 관리
+- [x] 더블탭 좋아요 기능 (모바일)
+  - [x] 이미지 더블탭 감지 (onTouchEnd, onDoubleClick)
+  - [x] 300ms 이내 탭 간격으로 더블탭 판단
+  - [x] 큰 하트 등장 (fade in, 80-100px 크기)
+  - [x] 1초 후 사라짐 (fade out)
+  - [x] 좋아요 상태 업데이트 (좋아요 안 한 경우만)
+  - [x] CSS 애니메이션 추가 (fadeInOut 키프레임)
 
 ---
 
@@ -346,3 +366,9 @@ Instagram UI 기반 SNS 프로젝트 개발 체크리스트
   - PostCard, PostCardSkeleton, PostFeed 컴포넌트
   - 게시물 목록 API 구현
   - 홈 피드 페이지 통합
+- ✅ 1-4 홈 피드 - 좋아요 기능 완료
+  - 좋아요 API (POST/DELETE) 구현
+  - useLike Hook 생성 (Optimistic update)
+  - 좋아요 버튼 기능 및 클릭 애니메이션
+  - 더블탭 좋아요 기능 (모바일)
+  - 게시물 목록 API에 좋아요 상태 포함

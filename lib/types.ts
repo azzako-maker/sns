@@ -76,5 +76,6 @@ export interface PostsResponse {
  */
 export interface PostWithComments extends PostWithStats {
   comments?: CommentWithUser[];
+  isLiked?: boolean; // 현재 사용자가 좋아요했는지 여부
 }
 
