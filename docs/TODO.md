@@ -78,40 +78,59 @@ Instagram UI 기반 SNS 프로젝트 개발 체크리스트
   - [x] `app/(main)/page.tsx` 생성 (기존 페이지 이동)
 
 ### 1-3. 홈 피드 - 게시물 목록
-- [ ] `components/post/PostCard.tsx` 컴포넌트
-  - [ ] 헤더 영역 (60px)
-    - [ ] 프로필 이미지 (32px 원형)
-    - [ ] 사용자명 (Bold)
-    - [ ] 시간 표시 (작고 회색)
-    - [ ] ⋯ 메뉴 버튼 (우측)
-  - [ ] 이미지 영역
-    - [ ] 1:1 정사각형 비율
-    - [ ] 더블탭 좋아요 기능 (모바일)
-  - [ ] 액션 버튼 영역 (48px)
-    - [ ] ❤️ 좋아요 버튼
-    - [ ] 💬 댓글 버튼
-    - [ ] ✈️ 공유 버튼 (UI만, 기능 제외)
-    - [ ] 🔖 북마크 버튼 (UI만, 기능 제외)
-  - [ ] 컨텐츠 영역
-    - [ ] 좋아요 수 표시 (Bold)
-    - [ ] 캡션 표시 (사용자명 Bold + 내용)
-    - [ ] 2줄 초과 시 "... 더 보기" 토글
-    - [ ] 댓글 미리보기 (최신 2개)
-- [ ] `components/post/PostCardSkeleton.tsx` 로딩 UI
-  - [ ] Skeleton UI 구현
-  - [ ] Shimmer 애니메이션 효과
-- [ ] `components/post/PostFeed.tsx` 컴포넌트
-  - [ ] 게시물 목록 렌더링
-  - [ ] 로딩 상태 처리
-  - [ ] 에러 상태 처리
-- [ ] `app/(main)/page.tsx` 홈 피드 페이지
-  - [ ] PostFeed 컴포넌트 통합
-  - [ ] 배경색 #FAFAFA 적용
-  - [ ] 최대 너비 630px 중앙 정렬
-- [ ] `app/api/posts/route.ts` GET API
-  - [ ] 페이지네이션 구현 (10개씩)
-  - [ ] 시간 역순 정렬
-  - [ ] 사용자 정보 JOIN
+- [x] TypeScript 타입 정의 (`lib/types.ts`)
+  - [x] Post, PostWithUser, PostWithStats, PostWithComments 타입
+  - [x] Comment, CommentWithUser 타입
+  - [x] PostsResponse API 응답 타입
+- [x] 상대 시간 표시 유틸리티 (`lib/utils/time.ts`)
+  - [x] formatRelativeTime() 함수 구현
+  - [x] "방금 전", "N분 전", "N시간 전", "N일 전" 형식
+  - [x] 7일 이상은 "YYYY-MM-DD" 형식
+- [x] `components/post/PostCard.tsx` 컴포넌트
+  - [x] 헤더 영역 (60px)
+    - [x] 프로필 이미지 (32px 원형, 기본 아바타)
+    - [x] 사용자명 (Bold, 프로필 링크)
+    - [x] 시간 표시 (상대 시간, 작고 회색)
+    - [x] ⋯ 메뉴 버튼 (우측, UI만)
+  - [x] 이미지 영역
+    - [x] 1:1 정사각형 비율 (aspect-square)
+    - [x] Next.js Image 컴포넌트 최적화
+    - [x] 더블탭 좋아요 기능 (모바일) - 1-4 단계에서 기능 구현 예정
+  - [x] 액션 버튼 영역 (48px)
+    - [x] ❤️ 좋아요 버튼 (UI만, 1-4 단계에서 기능 구현)
+    - [x] 💬 댓글 버튼 (UI만, 2-3 단계에서 기능 구현)
+    - [x] ✈️ 공유 버튼 (UI만, 기능 제외)
+    - [x] 🔖 북마크 버튼 (UI만, 기능 제외)
+  - [x] 컨텐츠 영역
+    - [x] 좋아요 수 표시 (Bold, "좋아요 N개" 형식)
+    - [x] 캡션 표시 (사용자명 Bold + 내용)
+    - [x] 2줄 초과 시 "... 더 보기" 토글
+    - [x] 댓글 미리보기 (최신 2개)
+    - [x] "댓글 N개 모두 보기" 링크
+- [x] `components/post/PostCardSkeleton.tsx` 로딩 UI
+  - [x] Skeleton UI 구현 (PostCard와 동일한 레이아웃)
+  - [x] Shimmer 애니메이션 효과 (Tailwind animate-pulse)
+- [x] `components/post/PostFeed.tsx` 컴포넌트
+  - [x] 게시물 목록 렌더링
+  - [x] 로딩 상태 처리 (PostCardSkeleton 표시)
+  - [x] 에러 상태 처리 (에러 메시지 + 재시도 버튼)
+  - [x] 빈 상태 처리 (게시물 없음 메시지)
+  - [x] 데이터 fetching (useEffect)
+- [x] `app/(main)/page.tsx` 홈 피드 페이지
+  - [x] PostFeed 컴포넌트 통합
+  - [x] 배경색 #FAFAFA 적용
+  - [x] 최대 너비 630px 중앙 정렬
+  - [x] 반응형 패딩 설정
+- [x] `app/api/posts/route.ts` GET API
+  - [x] 페이지네이션 구현 (10개씩, page 쿼리 파라미터)
+  - [x] 시간 역순 정렬 (created_at DESC)
+  - [x] 사용자 정보 JOIN (users 테이블)
+  - [x] 통계 정보 포함 (post_stats 뷰 활용)
+  - [x] 댓글 미리보기 (최신 2개)
+  - [x] hasMore 플래그 반환
+- [x] Next.js 이미지 설정
+  - [x] Supabase Storage 도메인 추가 (next.config.ts)
+  - [x] 이미지 최적화 설정
 
 ### 1-4. 홈 피드 - 좋아요 기능
 - [ ] `likes` 테이블 마이그레이션 생성
@@ -315,3 +334,15 @@ Instagram UI 기반 SNS 프로젝트 개발 체크리스트
 
 **마지막 업데이트**: 2025-11-04  
 **기반 문서**: [PRD.md](./prd.md)
+
+---
+
+## 완료된 작업 요약
+
+### 2025-11-04
+- ✅ 1-2 레이아웃 구조 완료 (Sidebar, Header, BottomNav, MainLayout)
+- ✅ 1-3 홈 피드 - 게시물 목록 완료
+  - TypeScript 타입 정의 및 유틸리티 함수
+  - PostCard, PostCardSkeleton, PostFeed 컴포넌트
+  - 게시물 목록 API 구현
+  - 홈 피드 페이지 통합
