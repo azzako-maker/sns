@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
     console.log("5️⃣ users 테이블에서 user_id 조회 중...");
     const { data: userData, error: userError } = await supabase
       .from("users")
-      .select("id, name")
+      .select("id, name, clerk_id")
       .eq("clerk_id", clerkUserId)
       .single();
 
@@ -152,6 +152,7 @@ export async function POST(request: NextRequest) {
       user: {
         id: userData.id,
         name: userData.name,
+        clerk_id: userData.clerk_id,
       },
     };
 

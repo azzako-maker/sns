@@ -14,6 +14,12 @@ ON CONFLICT (id) DO UPDATE SET
   public = false,
   file_size_limit = 6291456;
 
+-- 기존 정책 삭제 (이미 존재하는 경우)
+DROP POLICY IF EXISTS "Users can upload to own folder" ON storage.objects;
+DROP POLICY IF EXISTS "Users can view own files" ON storage.objects;
+DROP POLICY IF EXISTS "Users can delete own files" ON storage.objects;
+DROP POLICY IF EXISTS "Users can update own files" ON storage.objects;
+
 -- INSERT: 인증된 사용자만 자신의 폴더에 업로드 가능
 CREATE POLICY "Users can upload to own folder"
 ON storage.objects FOR INSERT

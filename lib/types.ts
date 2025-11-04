@@ -59,7 +59,7 @@ export interface Comment {
  * 사용자 정보가 포함된 댓글
  */
 export interface CommentWithUser extends Comment {
-  user: Pick<User, "id" | "name">;
+  user: Pick<User, "id" | "name" | "clerk_id">;
 }
 
 /**

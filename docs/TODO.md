@@ -290,16 +290,40 @@ Instagram UI 기반 SNS 프로젝트 개발 체크리스트
   - [x] "댓글 N개 모두 보기" 링크 (2개 초과 시)
 
 ### 2-4. 댓글 기능 - 삭제 & 무한스크롤
-- [ ] `app/api/comments/[commentId]/route.ts` DELETE API
-  - [ ] 댓글 삭제
-  - [ ] 본인만 삭제 가능 (권한 확인)
-- [ ] 댓글 삭제 버튼 UI
-  - [ ] ⋯ 메뉴에 삭제 옵션 추가
-  - [ ] 본인 댓글에만 표시
-- [ ] PostFeed 무한 스크롤 구현
-  - [ ] Intersection Observer 사용
-  - [ ] 하단 도달 시 다음 10개 로드
-  - [ ] 로딩 상태 표시
+- [x] `app/api/comments/[commentId]/route.ts` DELETE API
+  - [x] 댓글 삭제
+  - [x] 본인만 삭제 가능 (권한 확인)
+  - [x] Clerk 인증 확인
+  - [x] users 테이블에서 clerk_id로 user_id 조회
+  - [x] 댓글 소유자 확인 (403 에러)
+  - [x] 에러 처리 (401, 403, 404, 500)
+  - [x] 상세 로깅 추가
+- [x] 댓글 삭제 버튼 UI (`CommentList.tsx`)
+  - [x] Trash2 아이콘 사용 (lucide-react)
+  - [x] 본인 댓글에만 표시 (Clerk ID 비교)
+  - [x] hover 시에만 표시 (opacity-0 → opacity-100)
+  - [x] 삭제 확인 다이얼로그 (confirm)
+  - [x] 삭제 중 로딩 상태 (버튼 비활성화)
+  - [x] onCommentDeleted 콜백으로 부모에 알림
+- [x] PostCard에 댓글 삭제 처리
+  - [x] handleCommentDeleted 핸들러 추가
+  - [x] Optimistic update (로컬 상태에서 즉시 제거)
+  - [x] 댓글 수 업데이트
+- [x] CommentWithUser 타입에 clerk_id 추가
+  - [x] lib/types.ts 수정
+  - [x] app/api/posts/route.ts에서 clerk_id 포함
+  - [x] app/api/comments/route.ts에서 clerk_id 포함
+- [x] PostFeed 무한 스크롤 구현
+  - [x] Intersection Observer 사용
+  - [x] observerTarget ref로 하단 감지
+  - [x] rootMargin: 100px (하단 100px 전에 트리거)
+  - [x] 하단 도달 시 다음 페이지 로드 (page + 1)
+  - [x] isLoadingMore 상태로 중복 로딩 방지
+  - [x] 로딩 스켈레톤 표시 (2개)
+  - [x] "스크롤하여 더 보기..." 메시지
+  - [x] "모든 게시물을 불러왔습니다." 메시지
+  - [x] useCallback으로 함수 최적화
+  - [x] 상세 로깅 추가
 
 ---
 
@@ -465,4 +489,13 @@ Instagram UI 기반 SNS 프로젝트 개발 체크리스트
   - PostCard에 댓글 기능 통합
   - Optimistic update (로컬 상태 관리)
   - 댓글 작성 성공 시 즉시 UI 업데이트
+  - 상세 로깅 추가
+- ✅ 2-4 댓글 기능 - 삭제 & 무한스크롤 완료
+  - DELETE /api/comments/[commentId] API 구현
+  - CommentList에 삭제 버튼 추가 (본인 댓글만, hover 시 표시)
+  - PostCard에서 댓글 삭제 처리 (Optimistic update)
+  - CommentWithUser 타입에 clerk_id 추가
+  - PostFeed 무한 스크롤 구현 (Intersection Observer)
+  - 하단 100px 전에 자동 로딩
+  - 로딩 스켈레톤 및 완료 메시지 표시
   - 상세 로깅 추가

@@ -114,6 +114,19 @@ export default function PostCard({ post }: PostCardProps) {
     console.groupEnd();
   };
 
+  // 댓글 삭제 핸들러 (Optimistic update)
+  const handleCommentDeleted = (commentId: string) => {
+    console.group("🗑️ 댓글 삭제 처리");
+    console.log("삭제할 commentId:", commentId);
+
+    // 로컬 상태에서 댓글 제거
+    setLocalComments((prev) => prev.filter((c) => c.id !== commentId));
+    setLocalCommentsCount((prev) => Math.max(0, prev - 1));
+
+    console.log("✅ 로컬 상태 업데이트 완료");
+    console.groupEnd();
+  };
+
   return (
     <article className="bg-white border border-[#DBDBDB] rounded-lg mb-4">
       {/* 헤더 영역 (60px) */}
@@ -266,7 +279,11 @@ export default function PostCard({ post }: PostCardProps) {
               </Link>
             )}
             {/* 댓글 목록 (최신 2개만 표시) */}
-            <CommentList comments={localComments} showAll={false} />
+            <CommentList
+              comments={localComments}
+              showAll={false}
+              onCommentDeleted={handleCommentDeleted}
+            />
           </div>
         )}
       </div>

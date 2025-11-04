@@ -29,7 +29,7 @@ const POSTS_PER_PAGE = 10;
 
 export async function GET(request: NextRequest) {
   try {
-    console.group("게시물 목록 API 호출");
+    console.group("🔵 GET /api/posts - 게시물 목록 API 호출");
     const supabase = createClerkSupabaseClient();
 
     // 현재 사용자 ID 가져오기 (Clerk)
@@ -58,19 +58,18 @@ export async function GET(request: NextRequest) {
 
     console.log("페이지:", page, "오프셋:", offset, "리미트:", limit);
 
-    // post_stats 뷰에서 게시물 목록 조회 (통계 포함)
+    // posts 테이블에서 게시물 목록 조회
     const { data: postsData, error: postsError } = await supabase
-      .from("post_stats")
+      .from("posts")
       .select(
         `
-        post_id,
+        id,
         user_id,
         image_url,
         caption,
         created_at,
-        likes_count,
-        comments_count,
-        user:users!post_stats_user_id_fkey (
+        updated_at,
+        user:users!posts_user_id_fkey (
           id,
           clerk_id,
           name
@@ -81,7 +80,12 @@ export async function GET(request: NextRequest) {
       .range(offset, offset + limit - 1);
 
     if (postsError) {
-      console.error("게시물 조회 에러:", postsError);
+      console.error("❌ 게시물 조회 에러:", postsError);
+      console.error("에러 코드:", postsError.code);
+      console.error("에러 메시지:", postsError.message);
+      console.error("에러 상세:", postsError.details);
+      console.error("에러 힌트:", postsError.hint);
+      console.groupEnd();
       throw postsError;
     }
 
@@ -98,12 +102,24 @@ export async function GET(request: NextRequest) {
 
     console.log("조회된 게시물 수:", postsData.length);
 
-    // 각 게시물의 최신 댓글 2개 및 좋아요 상태 가져오기
+    // 각 게시물의 통계(좋아요 수, 댓글 수), 최신 댓글 2개 및 좋아요 상태 가져오기
     const postsWithComments: PostWithComments[] = await Promise.all(
-      postsData.map(async (postStat) => {
-        // 댓글이 있는 경우에만 조회
+      postsData.map(async (post) => {
+        // 좋아요 수 조회
+        const { count: likesCount } = await supabase
+          .from("likes")
+          .select("*", { count: "exact", head: true })
+          .eq("post_id", post.id);
+
+        // 댓글 수 조회
+        const { count: commentsCount } = await supabase
+          .from("comments")
+          .select("*", { count: "exact", head: true })
+          .eq("post_id", post.id);
+
+        // 댓글이 있는 경우에만 최신 2개 조회
         let comments: any[] = [];
-        if (postStat.comments_count > 0) {
+        if (commentsCount && commentsCount > 0) {
           const { data: commentsData, error: commentsError } = await supabase
             .from("comments")
             .select(
@@ -115,11 +131,12 @@ export async function GET(request: NextRequest) {
               created_at,
               user:users!comments_user_id_fkey (
                 id,
-                name
+                name,
+                clerk_id
               )
             `
             )
-            .eq("post_id", postStat.post_id)
+            .eq("post_id", post.id)
             .order("created_at", { ascending: false })
             .limit(2);
 
@@ -133,7 +150,7 @@ export async function GET(request: NextRequest) {
               content: comment.content,
               created_at: comment.created_at,
               updated_at: comment.created_at,
-              user: comment.user as { id: string; name: string },
+              user: comment.user as { id: string; name: string; clerk_id: string },
             }));
           }
         }
@@ -144,7 +161,7 @@ export async function GET(request: NextRequest) {
           const { data: likeData } = await supabase
             .from("likes")
             .select("id")
-            .eq("post_id", postStat.post_id)
+            .eq("post_id", post.id)
             .eq("user_id", currentUserId)
             .single();
 
@@ -152,15 +169,15 @@ export async function GET(request: NextRequest) {
         }
 
         return {
-          id: postStat.post_id,
-          user_id: postStat.user_id,
-          image_url: postStat.image_url,
-          caption: postStat.caption,
-          created_at: postStat.created_at,
-          updated_at: postStat.created_at, // post_stats에는 updated_at이 없으므로 created_at 사용
-          user: postStat.user as { id: string; clerk_id: string; name: string },
-          likes_count: Number(postStat.likes_count) || 0,
-          comments_count: Number(postStat.comments_count) || 0,
+          id: post.id,
+          user_id: post.user_id,
+          image_url: post.image_url,
+          caption: post.caption,
+          created_at: post.created_at,
+          updated_at: post.updated_at,
+          user: post.user as { id: string; clerk_id: string; name: string },
+          likes_count: likesCount || 0,
+          comments_count: commentsCount || 0,
           comments: comments,
           isLiked,
         };
@@ -169,7 +186,7 @@ export async function GET(request: NextRequest) {
 
     // 다음 페이지 존재 여부 확인
     const { count } = await supabase
-      .from("post_stats")
+      .from("posts")
       .select("*", { count: "exact", head: true });
 
     const totalPosts = count || 0;
@@ -187,9 +204,28 @@ export async function GET(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("게시물 목록 API 에러:", error);
+    console.error("❌ 게시물 목록 API 에러:", error);
+    
+    // 에러 상세 정보 출력
+    if (error instanceof Error) {
+      console.error("에러 이름:", error.name);
+      console.error("에러 메시지:", error.message);
+      console.error("에러 스택:", error.stack);
+    }
+    
+    // Supabase 에러인 경우 상세 정보 출력
+    if (error && typeof error === 'object' && 'code' in error) {
+      console.error("Supabase 에러 코드:", (error as any).code);
+      console.error("Supabase 에러 메시지:", (error as any).message);
+    }
+    
+    console.groupEnd();
+    
     return NextResponse.json(
-      { error: "게시물을 불러오는 중 오류가 발생했습니다." },
+      { 
+        error: "게시물을 불러오는 중 오류가 발생했습니다.",
+        details: error instanceof Error ? error.message : String(error)
+      },
       { status: 500 }
     );
   }

@@ -8,30 +8,44 @@
  * - 사용자명 (Bold) + 내용
  * - 상대 시간 표시
  * - 프로필 링크 연결
+ * - 삭제 버튼 (본인 댓글만)
  * - 빈 상태 처리
  *
  * @dependencies
  * - next/link: 프로필 링크
+ * - @clerk/nextjs: 현재 사용자 확인
+ * - lucide-react: 아이콘
  * - lib/types: CommentWithUser 타입
  * - lib/utils/time: 상대 시간 표시
  */
 
+import { useState } from "react";
 import Link from "next/link";
+import { useUser } from "@clerk/nextjs";
+import { Trash2 } from "lucide-react";
 import { CommentWithUser } from "@/lib/types";
 import { formatRelativeTime } from "@/lib/utils/time";
 
 interface CommentListProps {
   comments: CommentWithUser[];
   showAll?: boolean; // true면 모든 댓글, false면 최신 2개만
+  onCommentDeleted?: (commentId: string) => void; // 댓글 삭제 콜백
 }
 
 export default function CommentList({
   comments,
   showAll = false,
+  onCommentDeleted,
 }: CommentListProps) {
+  const { user } = useUser();
+  const [deletingCommentId, setDeletingCommentId] = useState<string | null>(
+    null
+  );
+
   console.log("💬 CommentList 렌더링");
   console.log("- 댓글 수:", comments.length);
   console.log("- showAll:", showAll);
+  console.log("- 현재 사용자 Clerk ID:", user?.id);
 
   // 표시할 댓글 결정
   const displayComments = showAll ? comments : comments.slice(0, 2);
@@ -43,32 +57,96 @@ export default function CommentList({
     return null; // 빈 상태는 표시하지 않음 (PostCard에서 처리)
   }
 
+  // 댓글 삭제 핸들러
+  const handleDelete = async (commentId: string) => {
+    console.group("🗑️ 댓글 삭제 시도");
+    console.log("- commentId:", commentId);
+
+    // 삭제 확인
+    if (!confirm("이 댓글을 삭제하시겠습니까?")) {
+      console.log("❌ 사용자가 삭제 취소");
+      console.groupEnd();
+      return;
+    }
+
+    setDeletingCommentId(commentId);
+
+    try {
+      console.log("📤 API 요청 전송 중...");
+
+      const response = await fetch(`/api/comments/${commentId}`, {
+        method: "DELETE",
+      });
+
+      console.log("📥 API 응답 상태:", response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "댓글 삭제에 실패했습니다.");
+      }
+
+      const data = await response.json();
+      console.log("✅ 댓글 삭제 성공:", data);
+
+      // 부모 컴포넌트에 알림
+      if (onCommentDeleted) {
+        onCommentDeleted(commentId);
+      }
+
+      console.groupEnd();
+    } catch (err) {
+      console.error("❌ 댓글 삭제 실패:", err);
+      console.groupEnd();
+      alert(err instanceof Error ? err.message : "댓글 삭제에 실패했습니다.");
+    } finally {
+      setDeletingCommentId(null);
+    }
+  };
+
   return (
     <div className="space-y-1">
-      {displayComments.map((comment) => (
-        <div
-          key={comment.id}
-          className="flex items-start gap-2 text-instagram-sm text-[#262626]"
-        >
-          {/* 사용자명 (Bold) */}
-          <Link
-            href={`/profile/${comment.user.id}`}
-            className="font-instagram-bold hover:opacity-70 flex-shrink-0"
+      {displayComments.map((comment) => {
+        // 현재 사용자의 댓글인지 확인 (Clerk ID 비교)
+        const isOwnComment = user?.id === comment.user.clerk_id;
+
+        return (
+          <div
+            key={comment.id}
+            className="flex items-start gap-2 text-instagram-sm text-[#262626] group"
           >
-            {comment.user.name}
-          </Link>
+            {/* 사용자명 (Bold) */}
+            <Link
+              href={`/profile/${comment.user.id}`}
+              className="font-instagram-bold hover:opacity-70 flex-shrink-0"
+            >
+              {comment.user.name}
+            </Link>
 
-          {/* 댓글 내용 */}
-          <div className="flex-1 min-w-0">
-            <span className="break-words">{comment.content}</span>
+            {/* 댓글 내용 */}
+            <div className="flex-1 min-w-0">
+              <span className="break-words">{comment.content}</span>
 
-            {/* 시간 표시 */}
-            <div className="text-instagram-xs text-[#8E8E8E] mt-1">
-              {formatRelativeTime(comment.created_at)}
+              {/* 시간 표시 */}
+              <div className="text-instagram-xs text-[#8E8E8E] mt-1 flex items-center gap-2">
+                <span>{formatRelativeTime(comment.created_at)}</span>
+
+                {/* 삭제 버튼 (본인 댓글만) */}
+                {isOwnComment && (
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(comment.id)}
+                    disabled={deletingCommentId === comment.id}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity text-[#ED4956] hover:text-[#C13640] disabled:opacity-50"
+                    aria-label="댓글 삭제"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
