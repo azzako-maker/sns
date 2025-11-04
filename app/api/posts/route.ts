@@ -296,13 +296,19 @@ export async function POST(request: NextRequest) {
 
     console.log("파일 경로:", filePath);
 
+    // File 객체를 ArrayBuffer로 변환 (서버 환경에서 필요)
+    console.log("파일을 ArrayBuffer로 변환 중...");
+    const fileBuffer = await file.arrayBuffer();
+    console.log("ArrayBuffer 변환 완료, 크기:", fileBuffer.byteLength);
+
     // Service Role 클라이언트로 Storage 업로드 (RLS 우회)
     const serviceRoleClient = getServiceRoleClient();
     const { data: uploadData, error: uploadError } = await serviceRoleClient.storage
       .from(STORAGE_BUCKET)
-      .upload(filePath, file, {
+      .upload(filePath, fileBuffer, {
         cacheControl: "3600",
         upsert: false,
+        contentType: file.type,
       });
 
     if (uploadError) {

@@ -247,25 +247,47 @@ Instagram UI 기반 SNS 프로젝트 개발 체크리스트
   - [x] 상세 로깅 추가
 
 ### 2-3. 댓글 기능 - UI & 작성
-- [ ] `comments` 테이블 마이그레이션 생성
-  - [ ] `id` (UUID, PK)
-  - [ ] `post_id` (UUID, FK to posts)
-  - [ ] `user_id` (UUID, FK to users)
-  - [ ] `content` (TEXT)
-  - [ ] `created_at` (TIMESTAMPTZ)
-- [ ] `components/comment/CommentList.tsx` 컴포넌트
-  - [ ] 댓글 목록 렌더링
-  - [ ] 사용자명 + 내용 표시
-  - [ ] 시간 표시
-- [ ] `components/comment/CommentForm.tsx` 컴포넌트
-  - [ ] "댓글 달기..." 입력창
-  - [ ] Enter 키 또는 "게시" 버튼으로 제출
-- [ ] `app/api/comments/route.ts` POST API
-  - [ ] 댓글 작성
-  - [ ] 사용자 인증 확인
-- [ ] PostCard에 댓글 기능 통합
-  - [ ] 댓글 미리보기 (최신 2개)
-  - [ ] "댓글 N개 모두 보기" 링크
+- [x] `comments` 테이블 마이그레이션 생성
+  - [x] `id` (UUID, PK)
+  - [x] `post_id` (UUID, FK to posts)
+  - [x] `user_id` (UUID, FK to users)
+  - [x] `content` (TEXT)
+  - [x] `created_at` (TIMESTAMPTZ)
+  - [x] 이미 sns.sql에 정의되어 있음 (추가 마이그레이션 불필요)
+- [x] `components/comment/CommentList.tsx` 컴포넌트
+  - [x] 댓글 목록 렌더링
+  - [x] 사용자명 (Bold) + 내용 표시
+  - [x] 상대 시간 표시 (formatRelativeTime)
+  - [x] 프로필 링크 연결
+  - [x] showAll prop (전체 댓글 / 최신 2개)
+  - [x] 빈 상태 처리
+- [x] `components/comment/CommentForm.tsx` 컴포넌트
+  - [x] "댓글 달기..." 입력창 (Instagram 스타일)
+  - [x] Enter 키 또는 "게시" 버튼으로 제출
+  - [x] 빈 댓글 방지
+  - [x] 최대 2,200자 제한
+  - [x] 로딩 상태 표시 ("게시 중...")
+  - [x] 에러 메시지 표시
+  - [x] 인증 확인 (로그인하지 않은 경우 비활성화)
+  - [x] 성공 시 입력창 초기화 및 부모 컴포넌트에 알림
+- [x] `app/api/comments/route.ts` POST API
+  - [x] 댓글 작성
+  - [x] Clerk 인증 확인 (auth())
+  - [x] users 테이블에서 clerk_id로 user_id 조회
+  - [x] 게시물 존재 여부 확인
+  - [x] 입력 검증 (빈 문자열, 2,200자 제한)
+  - [x] comments 테이블에 저장
+  - [x] 사용자 정보를 포함한 댓글 반환
+  - [x] 에러 처리 (401, 404, 500)
+  - [x] 상세 로깅 추가
+- [x] PostCard에 댓글 기능 통합
+  - [x] 댓글 로컬 상태 관리 (localComments, localCommentsCount)
+  - [x] CommentList 컴포넌트 통합 (최신 2개 표시)
+  - [x] CommentForm 컴포넌트 통합 (하단)
+  - [x] handleCommentAdded 핸들러 (Optimistic update)
+  - [x] 새 댓글 추가 시 로컬 상태 업데이트
+  - [x] 댓글 수 업데이트
+  - [x] "댓글 N개 모두 보기" 링크 (2개 초과 시)
 
 ### 2-4. 댓글 기능 - 삭제 & 무한스크롤
 - [ ] `app/api/comments/[commentId]/route.ts` DELETE API
@@ -435,4 +457,12 @@ Instagram UI 기반 SNS 프로젝트 개발 체크리스트
   - CreatePostModal API 연결
   - 파일 검증 (서버 측 재검증)
   - 에러 처리 및 롤백 로직
+  - 상세 로깅 추가
+- ✅ 2-3 댓글 기능 - UI & 작성 완료
+  - POST /api/comments API 구현
+  - CommentForm 컴포넌트 생성 (Instagram 스타일 입력창)
+  - CommentList 컴포넌트 생성 (사용자명 + 내용 + 시간)
+  - PostCard에 댓글 기능 통합
+  - Optimistic update (로컬 상태 관리)
+  - 댓글 작성 성공 시 즉시 UI 업데이트
   - 상세 로깅 추가

@@ -28,9 +28,11 @@ import {
   MoreHorizontal,
   User,
 } from "lucide-react";
-import { PostWithComments } from "@/lib/types";
+import { PostWithComments, CommentWithUser } from "@/lib/types";
 import { formatRelativeTime } from "@/lib/utils/time";
 import { useLike } from "@/hooks/use-like";
+import CommentForm from "@/components/comment/CommentForm";
+import CommentList from "@/components/comment/CommentList";
 
 interface PostCardProps {
   post: PostWithComments;
@@ -41,6 +43,14 @@ export default function PostCard({ post }: PostCardProps) {
   const [isAnimating, setIsAnimating] = useState(false);
   const [showDoubleTapHeart, setShowDoubleTapHeart] = useState(false);
   const lastTapRef = useRef(0);
+
+  // 댓글 로컬 상태 관리 (Optimistic update)
+  const [localComments, setLocalComments] = useState<CommentWithUser[]>(
+    post.comments || []
+  );
+  const [localCommentsCount, setLocalCommentsCount] = useState(
+    post.comments_count
+  );
 
   // 좋아요 Hook 사용
   const { isLiked, likesCount, toggleLike, isLoading } = useLike({
@@ -54,7 +64,8 @@ export default function PostCard({ post }: PostCardProps) {
   console.log("사용자:", post.user.name);
   console.log("좋아요 수:", likesCount);
   console.log("좋아요 상태:", isLiked);
-  console.log("댓글 수:", post.comments_count);
+  console.log("댓글 수:", localCommentsCount);
+  console.log("로컬 댓글 배열 길이:", localComments.length);
   console.groupEnd();
 
   // 캡션이 2줄 초과인지 확인 (대략적인 계산)
@@ -88,6 +99,19 @@ export default function PostCard({ post }: PostCardProps) {
     }
 
     lastTapRef.current = currentTime;
+  };
+
+  // 댓글 추가 핸들러 (Optimistic update)
+  const handleCommentAdded = (newComment: CommentWithUser) => {
+    console.group("💬 새 댓글 추가");
+    console.log("새 댓글:", newComment);
+
+    // 로컬 상태 업데이트 (최신 댓글이 맨 위로)
+    setLocalComments((prev) => [newComment, ...prev]);
+    setLocalCommentsCount((prev) => prev + 1);
+
+    console.log("✅ 로컬 상태 업데이트 완료");
+    console.groupEnd();
   };
 
   return (
@@ -230,32 +254,25 @@ export default function PostCard({ post }: PostCardProps) {
         )}
 
         {/* 댓글 미리보기 */}
-        {post.comments && post.comments.length > 0 && (
+        {localComments.length > 0 && (
           <div className="space-y-1">
             {/* 댓글 전체 보기 링크 */}
-            {post.comments_count > 2 && (
+            {localCommentsCount > 2 && (
               <Link
                 href={`/post/${post.id}`}
                 className="text-instagram-sm text-[#8E8E8E] hover:opacity-70 block"
               >
-                댓글 {post.comments_count}개 모두 보기
+                댓글 {localCommentsCount}개 모두 보기
               </Link>
             )}
-            {/* 최신 댓글 2개 */}
-            {post.comments.slice(0, 2).map((comment) => (
-              <div key={comment.id} className="text-instagram-sm text-[#262626]">
-                <Link
-                  href={`/profile/${comment.user.id}`}
-                  className="font-instagram-bold hover:opacity-70 inline-block mr-1"
-                >
-                  {comment.user.name}
-                </Link>
-                <span>{comment.content}</span>
-              </div>
-            ))}
+            {/* 댓글 목록 (최신 2개만 표시) */}
+            <CommentList comments={localComments} showAll={false} />
           </div>
         )}
       </div>
+
+      {/* 댓글 입력 폼 */}
+      <CommentForm postId={post.id} onCommentAdded={handleCommentAdded} />
     </article>
   );
 }
