@@ -386,25 +386,34 @@ Instagram UI 기반 SNS 프로젝트 개발 체크리스트
   - [x] 프로필 업데이트 콜백 (팔로워 수 실시간 업데이트)
 
 ### 3-4. 게시물 상세 모달/페이지
-- [ ] `components/post/PostModal.tsx` 컴포넌트 (Desktop)
-  - [ ] 모달 형태
-  - [ ] 좌측: 이미지 (50%)
-  - [ ] 우측: 댓글 영역 (50%)
-    - [ ] 헤더 (사용자명, ⋯ 메뉴)
-    - [ ] 댓글 목록 (스크롤 가능)
-    - [ ] 액션 버튼 (좋아요, 댓글, 공유, 북마크)
-    - [ ] 좋아요 수
-    - [ ] 댓글 입력창
-- [ ] `app/(main)/post/[postId]/page.tsx` (Mobile)
-  - [ ] 전체 페이지 형태
-  - [ ] 게시물 상세 정보 표시
-- [ ] `app/api/posts/[postId]/route.ts` GET API
-  - [ ] 게시물 상세 정보 조회
-  - [ ] 댓글 목록 포함
-- [ ] 게시물 삭제 기능
-  - [ ] ⋯ 메뉴에 삭제 옵션 추가
-  - [ ] 본인 게시물만 삭제 가능
-  - [ ] `app/api/posts/[postId]/route.ts` DELETE API
+- [x] `components/post/PostModal.tsx` 컴포넌트 (Desktop)
+  - [x] 모달 형태 (shadcn Dialog 사용)
+  - [x] 좌측: 이미지 (50%)
+  - [x] 우측: 댓글 영역 (50%)
+    - [x] 헤더 (사용자명, ⋯ 메뉴)
+    - [x] 댓글 목록 (스크롤 가능, 전체 댓글 표시)
+    - [x] 액션 버튼 (좋아요, 댓글, 공유, 북마크)
+    - [x] 좋아요 수
+    - [x] 댓글 입력창
+    - [x] 게시물 삭제 기능 (본인 게시물만)
+- [x] `app/(main)/post/[postId]/page.tsx` (Mobile)
+  - [x] 전체 페이지 형태
+  - [x] 게시물 상세 정보 표시 (PostCard 재사용)
+  - [x] 로딩 및 에러 처리
+- [x] `app/api/posts/[postId]/route.ts` GET API
+  - [x] 게시물 상세 정보 조회
+  - [x] 전체 댓글 목록 포함 (최신 순)
+  - [x] 좋아요 상태 확인
+  - [x] 사용자 정보 포함
+- [x] `app/api/posts/[postId]/route.ts` DELETE API
+  - [x] 게시물 삭제
+  - [x] 본인 게시물만 삭제 가능 (권한 확인)
+  - [x] Storage 파일 삭제 (롤백)
+  - [x] 상세 로깅 추가
+- [x] PostGrid와 PostCard에 링크 연결
+  - [x] PostGrid: `/post/[postId]` 링크 (이미 구현됨)
+  - [x] PostCard: 이미지 클릭 시 `/post/[postId]` 이동
+  - [x] 프로필 링크 수정 (clerk_id 사용)
 
 ---
 

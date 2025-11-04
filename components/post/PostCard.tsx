@@ -165,6 +165,10 @@ export default function PostCard({ post }: PostCardProps) {
         className="relative aspect-square w-full bg-gray-100 cursor-pointer select-none"
         onTouchEnd={handleDoubleTap}
         onDoubleClick={handleDoubleTap}
+        onClick={() => {
+          // 게시물 상세 페이지로 이동
+          window.location.href = `/post/${post.id}`;
+        }}
       >
         <Image
           src={post.image_url}
@@ -245,12 +249,12 @@ export default function PostCard({ post }: PostCardProps) {
         {/* 캡션 */}
         {post.caption && (
           <div className="text-instagram-sm text-[#262626]">
-            <Link
-              href={`/profile/${post.user.id}`}
-              className="font-instagram-bold hover:opacity-70 inline-block mr-1"
-            >
-              {post.user.name}
-            </Link>
+              <Link
+                href={`/profile/${post.user.clerk_id}`}
+                className="font-instagram-bold hover:opacity-70 inline-block mr-1"
+              >
+                {post.user.name}
+              </Link>
             <span className={isCaptionExpanded ? "" : "line-clamp-2"}>
               {post.caption}
             </span>
