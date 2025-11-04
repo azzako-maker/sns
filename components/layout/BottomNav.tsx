@@ -22,6 +22,10 @@ import Link from "next/link";
 import { Home, Search, Plus, Heart, User } from "lucide-react";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 
+interface BottomNavProps {
+  onCreatePostClick?: () => void;
+}
+
 interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
@@ -59,7 +63,7 @@ const navItems: NavItem[] = [
   },
 ];
 
-export default function BottomNav() {
+export default function BottomNav({ onCreatePostClick }: BottomNavProps = {}) {
   const pathname = usePathname();
   const { user } = useUser();
 
@@ -71,9 +75,33 @@ export default function BottomNav() {
   console.log("프로필 링크:", profileHref);
   console.groupEnd();
 
+  // 만들기 버튼 클릭 핸들러
+  const handleCreateClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    onCreatePostClick?.();
+  };
+
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-[50px] bg-white border-t border-[#DBDBDB] z-50 flex items-center justify-around">
       {navItems.map((item) => {
+        const isCreateButton = item.label === "만들기";
+
+        // 만들기 버튼은 클릭 핸들러 사용
+        if (isCreateButton) {
+          return (
+            <SignedIn key={item.href}>
+              <button
+                type="button"
+                onClick={handleCreateClick}
+                className="flex flex-col items-center justify-center h-full px-4"
+                aria-label={item.label}
+              >
+                <item.icon className="w-6 h-6 text-[#262626]" />
+              </button>
+            </SignedIn>
+          );
+        }
+
         // 인증이 필요한 메뉴는 SignedIn으로 감싸기
         if (item.requiresAuth) {
           return (

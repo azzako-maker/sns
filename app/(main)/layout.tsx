@@ -10,23 +10,37 @@
  * - components/layout/Sidebar: Desktop/Tablet 사이드바
  * - components/layout/Header: Mobile 헤더
  * - components/layout/BottomNav: Mobile 하단 네비게이션
+ * - components/post/CreatePostModal: 게시물 작성 모달
  */
 
+"use client";
+
+import { useState } from "react";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
 import BottomNav from "@/components/layout/BottomNav";
+import CreatePostModal from "@/components/post/CreatePostModal";
 
 export default function MainLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
+
   console.log("MainLayout 렌더링 - 반응형 레이아웃 구조 적용");
+  console.log("게시물 작성 모달 상태:", isCreatePostModalOpen);
+
+  const handlePostSuccess = () => {
+    console.log("게시물 작성 성공 - 피드 새로고침 필요");
+    // TODO: PostFeed 새로고침 (2-2 단계에서 구현)
+    // window.location.reload() 또는 상태 업데이트
+  };
 
   return (
     <>
       {/* Desktop/Tablet: Sidebar 표시 */}
-      <Sidebar />
+      <Sidebar onCreatePostClick={() => setIsCreatePostModalOpen(true)} />
 
       {/* Mobile: Header 표시 */}
       <Header />
@@ -40,7 +54,14 @@ export default function MainLayout({
       </main>
 
       {/* Mobile: BottomNav 표시 */}
-      <BottomNav />
+      <BottomNav onCreatePostClick={() => setIsCreatePostModalOpen(true)} />
+
+      {/* 게시물 작성 모달 */}
+      <CreatePostModal
+        open={isCreatePostModalOpen}
+        onOpenChange={setIsCreatePostModalOpen}
+        onSuccess={handlePostSuccess}
+      />
     </>
   );
 }

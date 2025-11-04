@@ -15,8 +15,9 @@
  */
 
 import { UserButton } from "@clerk/nextjs";
-import { SignedIn } from "@clerk/nextjs";
+import { SignedIn, SignedOut } from "@clerk/nextjs";
 import { Bell, MessageCircle } from "lucide-react";
+import Link from "next/link";
 
 export default function Header() {
   return (
@@ -50,6 +51,17 @@ export default function Header() {
           {/* 프로필 (Clerk UserButton) */}
           <UserButton />
         </SignedIn>
+
+        <SignedOut>
+          {/* 로그인 버튼 */}
+          <Link
+            href="/sign-in"
+            className="px-4 py-2 bg-[#0095f6] text-white text-sm font-semibold rounded-lg hover:bg-[#0095f6]/90 transition-colors"
+            aria-label="로그인"
+          >
+            로그인
+          </Link>
+        </SignedOut>
       </div>
     </header>
   );

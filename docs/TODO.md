@@ -176,26 +176,75 @@ Instagram UI 기반 SNS 프로젝트 개발 체크리스트
 ## 2️⃣ 2단계: 게시물 작성 & 댓글 기능
 
 ### 2-1. 게시물 작성 모달
-- [ ] `components/post/CreatePostModal.tsx` 컴포넌트
-  - [ ] Dialog 기반 모달
-  - [ ] 이미지 업로드 영역
-  - [ ] 이미지 미리보기 UI
-  - [ ] 캡션 입력 필드 (최대 2,200자)
-  - [ ] 파일 크기 검증 (최대 5MB)
-  - [ ] 이미지 형식 검증 (JPG, PNG, WebP)
+- [x] `components/post/CreatePostModal.tsx` 컴포넌트
+  - [x] Dialog 기반 모달 (shadcn/ui Dialog 사용)
+  - [x] 모달 크기: 최대 너비 600px (Instagram 스타일)
+  - [x] 반응형 레이아웃 (Desktop: 좌우 분할, Mobile: 세로 스택)
+  - [x] 헤더: "새 게시물 만들기" + 닫기 버튼
+  - [x] 이미지 업로드 영역
+    - [x] 파일 선택 버튼 ("컴퓨터에서 선택")
+    - [x] hidden input (accept="image/*")
+    - [x] 드래그 앤 드롭 안내 텍스트 (UI만)
+  - [x] 이미지 미리보기 UI
+    - [x] Object URL 사용 (메모리 효율적)
+    - [x] 1:1 정사각형 비율 유지 (aspect-square)
+    - [x] Next.js Image 컴포넌트 최적화
+    - [x] 이미지 교체 버튼 (X 아이콘)
+  - [x] 캡션 입력 필드
+    - [x] Textarea 컴포넌트 사용
+    - [x] 최대 2,200자 제한
+    - [x] 글자 수 카운터 (N/2,200)
+    - [x] 색상 변화 (2,000자 이상: 주황색, 2,200자: 빨간색)
+    - [x] 플레이스홀더: "문구 입력..."
+  - [x] 파일 검증 로직
+    - [x] 파일 크기 검증 (최대 5MB)
+    - [x] 이미지 형식 검증 (JPG, PNG, WebP)
+    - [x] 사용자 친화적 에러 메시지
+    - [x] 검증 실패 시 파일 입력 초기화
+  - [x] 상태 관리
+    - [x] selectedFile, previewUrl, caption, isUploading, error 상태
+    - [x] 모달 닫을 때 상태 초기화
+    - [x] Object URL 메모리 정리 (useEffect cleanup)
+  - [x] 유효성 검사
+    - [x] 이미지 필수 (없으면 "공유" 버튼 비활성화)
+    - [x] 업로드 중 버튼 비활성화 ("공유 중..." 텍스트)
+  - [x] 에러 처리
+    - [x] 에러 메시지 표시 영역
+    - [x] 파일 크기 초과, 형식 오류, 업로드 실패 처리
+  - [x] 접근성
+    - [x] ARIA 레이블 추가
+    - [x] aria-live="polite" 에러 메시지
+    - [x] 키보드 네비게이션 지원
+- [x] Sidebar/BottomNav와 모달 연동
+  - [x] `app/(main)/layout.tsx`에서 모달 상태 관리
+  - [x] Sidebar "만들기" 버튼에 onClick 핸들러 추가
+  - [x] BottomNav "만들기" 버튼에 onClick 핸들러 추가
+  - [x] 모달 열기/닫기 기능 연결
+  - [x] onSuccess 콜백 추가 (게시물 작성 성공 시)
 
 ### 2-2. 게시물 작성 - 이미지 업로드
-- [ ] Supabase Storage 버킷 확인 (`uploads`)
-- [ ] `app/api/posts/route.ts` POST API
-  - [ ] 파일 업로드 처리
-  - [ ] 이미지 경로 저장
-  - [ ] 캡션 저장
-  - [ ] 사용자 ID 연결
-- [ ] 파일 업로드 로직
-  - [ ] 파일 검증 (크기, 형식)
-  - [ ] Storage 업로드
-  - [ ] Public URL 생성
-  - [ ] 데이터베이스 저장
+- [x] Supabase Storage 버킷 확인 (`uploads`)
+  - [x] setup_storage.sql 마이그레이션 파일 확인
+  - [x] Service Role 클라이언트로 RLS 우회 업로드 구현
+- [x] `app/api/posts/route.ts` POST API
+  - [x] Clerk 인증 확인 (auth() 사용)
+  - [x] FormData에서 파일 및 캡션 추출
+  - [x] 파일 업로드 처리
+  - [x] 이미지 경로 저장 (Public URL)
+  - [x] 캡션 저장 (최대 2,200자)
+  - [x] 사용자 ID 연결 (clerk_id로 users 테이블 조회)
+  - [x] 에러 처리 및 롤백 로직 (업로드 실패 시 Storage 파일 삭제)
+- [x] 파일 업로드 로직
+  - [x] 파일 검증 (크기 5MB, 형식 JPG/PNG/WebP)
+  - [x] 파일명 생성: `{clerk_user_id}/{timestamp}-{random}.{ext}`
+  - [x] Storage 업로드 (Service Role 클라이언트 사용)
+  - [x] Public URL 생성 (getPublicUrl)
+  - [x] 데이터베이스 저장 (posts 테이블)
+- [x] CreatePostModal API 연결
+  - [x] handleSubmit 함수에서 FormData 생성 및 API 호출
+  - [x] 성공/실패 처리 및 에러 메시지 표시
+  - [x] 로딩 상태 관리
+  - [x] 상세 로깅 추가
 
 ### 2-3. 댓글 기능 - UI & 작성
 - [ ] `comments` 테이블 마이그레이션 생성
@@ -372,3 +421,18 @@ Instagram UI 기반 SNS 프로젝트 개발 체크리스트
   - 좋아요 버튼 기능 및 클릭 애니메이션
   - 더블탭 좋아요 기능 (모바일)
   - 게시물 목록 API에 좋아요 상태 포함
+- ✅ 2-1 게시물 작성 모달 완료
+  - CreatePostModal 컴포넌트 생성
+  - 이미지 업로드 및 미리보기 UI
+  - 파일 검증 (크기, 형식)
+  - 캡션 입력 필드 (2,200자 제한)
+  - Sidebar/BottomNav와 모달 연동
+  - 상태 관리 및 메모리 정리
+- ✅ 2-2 게시물 작성 - 이미지 업로드 완료
+  - POST /api/posts API 구현
+  - Supabase Storage 업로드 (Service Role 클라이언트)
+  - Public URL 생성 및 posts 테이블 저장
+  - CreatePostModal API 연결
+  - 파일 검증 (서버 측 재검증)
+  - 에러 처리 및 롤백 로직
+  - 상세 로깅 추가

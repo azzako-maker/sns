@@ -28,7 +28,11 @@ interface MenuItem {
   isActive?: (pathname: string) => boolean;
 }
 
-const menuItems: MenuItem[] = [
+interface SidebarProps {
+  onCreatePostClick?: () => void;
+}
+
+const menuItems: (MenuItem & { onClick?: () => void })[] = [
   {
     icon: Home,
     label: "홈",
@@ -44,12 +48,12 @@ const menuItems: MenuItem[] = [
   {
     icon: Plus,
     label: "만들기",
-    href: "#", // TODO: 모달 연결 예정
+    href: "#",
     isActive: () => false,
   },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ onCreatePostClick }: SidebarProps = {}) {
   const pathname = usePathname();
   const { user } = useUser();
 
@@ -60,6 +64,12 @@ export default function Sidebar() {
 
   // 프로필 링크는 동적으로 생성 (사용자 ID 필요)
   const profileHref = user ? `/profile/${user.id}` : "/sign-in";
+
+  // 만들기 버튼 클릭 핸들러
+  const handleCreateClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    onCreatePostClick?.();
+  };
 
   return (
     <aside className="hidden md:flex md:flex-col md:fixed md:left-0 md:top-0 md:h-screen md:bg-white md:border-r md:border-[#DBDBDB] md:z-40">
@@ -76,31 +86,50 @@ export default function Sidebar() {
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive = item.isActive?.(pathname) ?? false;
+              const isCreateButton = item.label === "만들기";
 
               return (
                 <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className={`
-                      flex items-center gap-4 px-4 py-3 rounded-lg
-                      transition-colors duration-200
-                      ${
-                        isActive
-                          ? "font-bold text-[#262626]"
-                          : "text-[#262626] hover:bg-[#FAFAFA]"
-                      }
-                    `}
-                    aria-label={item.label}
-                  >
-                    <Icon
-                      className={`w-6 h-6 ${
-                        isActive ? "text-[#0095f6]" : "text-[#262626]"
-                      }`}
-                    />
-                    <span className="hidden lg:inline text-base">
-                      {item.label}
-                    </span>
-                  </Link>
+                  {isCreateButton ? (
+                    <button
+                      type="button"
+                      onClick={handleCreateClick}
+                      className={`
+                        flex items-center gap-4 px-4 py-3 rounded-lg w-full
+                        transition-colors duration-200
+                        text-[#262626] hover:bg-[#FAFAFA]
+                      `}
+                      aria-label={item.label}
+                    >
+                      <Icon className="w-6 h-6" />
+                      <span className="hidden lg:inline text-base">
+                        {item.label}
+                      </span>
+                    </button>
+                  ) : (
+                    <Link
+                      href={item.href}
+                      className={`
+                        flex items-center gap-4 px-4 py-3 rounded-lg
+                        transition-colors duration-200
+                        ${
+                          isActive
+                            ? "font-bold text-[#262626]"
+                            : "text-[#262626] hover:bg-[#FAFAFA]"
+                        }
+                      `}
+                      aria-label={item.label}
+                    >
+                      <Icon
+                        className={`w-6 h-6 ${
+                          isActive ? "text-[#0095f6]" : "text-[#262626]"
+                        }`}
+                      />
+                      <span className="hidden lg:inline text-base">
+                        {item.label}
+                      </span>
+                    </Link>
+                  )}
                 </li>
               );
             })}
