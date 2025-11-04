@@ -55,11 +55,39 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1", 10);
     const offset = (page - 1) * POSTS_PER_PAGE;
     const limit = POSTS_PER_PAGE;
+    const userIdParam = searchParams.get("userId"); // Clerk ID (clerk_id)
 
     console.log("페이지:", page, "오프셋:", offset, "리미트:", limit);
+    console.log("사용자 필터 (Clerk ID):", userIdParam || "전체");
+
+    // 특정 사용자 필터링을 위한 user_id 조회
+    let targetUserId: string | null = null;
+    if (userIdParam) {
+      const { data: targetUser } = await supabase
+        .from("users")
+        .select("id")
+        .eq("clerk_id", userIdParam)
+        .single();
+
+      if (targetUser) {
+        targetUserId = targetUser.id;
+        console.log("대상 사용자 ID (Supabase):", targetUserId);
+      } else {
+        console.log("사용자를 찾을 수 없음:", userIdParam);
+        // 사용자를 찾을 수 없으면 빈 배열 반환
+        return NextResponse.json<PostsResponse>(
+          {
+            posts: [],
+            hasMore: false,
+            page,
+          },
+          { status: 200 }
+        );
+      }
+    }
 
     // posts 테이블에서 게시물 목록 조회
-    const { data: postsData, error: postsError } = await supabase
+    let query = supabase
       .from("posts")
       .select(
         `
@@ -76,8 +104,18 @@ export async function GET(request: NextRequest) {
         )
       `
       )
-      .order("created_at", { ascending: false })
-      .range(offset, offset + limit - 1);
+      .order("created_at", { ascending: false });
+
+    // 특정 사용자 필터링
+    if (targetUserId) {
+      query = query.eq("user_id", targetUserId);
+    }
+
+    // 페이지네이션 적용
+    const { data: postsData, error: postsError } = await query.range(
+      offset,
+      offset + limit - 1
+    );
 
     if (postsError) {
       console.error("❌ 게시물 조회 에러:", postsError);
@@ -185,9 +223,13 @@ export async function GET(request: NextRequest) {
     );
 
     // 다음 페이지 존재 여부 확인
-    const { count } = await supabase
-      .from("posts")
-      .select("*", { count: "exact", head: true });
+    let countQuery = supabase.from("posts").select("*", { count: "exact", head: true });
+    
+    if (targetUserId) {
+      countQuery = countQuery.eq("user_id", targetUserId);
+    }
+    
+    const { count } = await countQuery;
 
     const totalPosts = count || 0;
     const hasMore = offset + limit < totalPosts;

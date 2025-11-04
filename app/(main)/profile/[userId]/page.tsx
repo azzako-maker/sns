@@ -17,6 +17,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { UserProfile } from "@/lib/types";
 import ProfileHeader from "@/components/profile/ProfileHeader";
+import PostGrid from "@/components/profile/PostGrid";
 
 export default function ProfilePage() {
   const params = useParams();
@@ -114,12 +115,8 @@ export default function ProfilePage() {
     <div className="w-full bg-[#FAFAFA] min-h-screen">
       <ProfileHeader profile={profile} />
       
-      {/* 게시물 그리드는 3-2 단계에서 구현 예정 */}
-      <div className="w-full max-w-[935px] mx-auto px-4 py-6">
-        <div className="text-center text-[#8E8E8E] py-12">
-          <p>게시물 그리드는 다음 단계에서 구현됩니다.</p>
-        </div>
-      </div>
+      {/* 게시물 그리드 */}
+      <PostGrid userId={userId} />
     </div>
   );
 }
