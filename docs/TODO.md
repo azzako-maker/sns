@@ -356,20 +356,34 @@ Instagram UI 기반 SNS 프로젝트 개발 체크리스트
   - [x] 사용자 필터링 시 페이지네이션도 정확히 동작
 
 ### 3-3. 팔로우 기능
-- [ ] `follows` 테이블 마이그레이션 생성
-  - [ ] `follower_id` (UUID, FK to users)
-  - [ ] `following_id` (UUID, FK to users)
-  - [ ] `created_at` (TIMESTAMPTZ)
-  - [ ] UNIQUE 제약조건 (follower_id, following_id)
-  - [ ] 자기 자신 팔로우 방지 체크
-- [ ] `app/api/follows/route.ts` API
-  - [ ] POST: 팔로우 추가
-  - [ ] DELETE: 언팔로우
-- [ ] 팔로우/언팔로우 버튼 구현
-  - [ ] 미팔로우: "팔로우" 버튼 (파란색 #0095f6)
-  - [ ] 팔로우 중: "팔로잉" 버튼 (회색)
-  - [ ] Hover 시: "언팔로우" 표시 (빨간 테두리)
-  - [ ] 클릭 시 즉시 API 호출 → UI 업데이트
+- [x] `follows` 테이블 마이그레이션 생성
+  - [x] `follower_id` (UUID, FK to users)
+  - [x] `following_id` (UUID, FK to users)
+  - [x] `created_at` (TIMESTAMPTZ)
+  - [x] UNIQUE 제약조건 (follower_id, following_id)
+  - [x] 자기 자신 팔로우 방지 체크 (이미 sns.sql에 정의되어 있음)
+- [x] `app/api/follows/route.ts` API
+  - [x] POST: 팔로우 추가
+  - [x] DELETE: 언팔로우
+  - [x] Clerk 인증 확인
+  - [x] Clerk ID → Supabase user_id 변환
+  - [x] 중복 팔로우 방지 (409 에러)
+  - [x] 자기 자신 팔로우 방지 (400 에러)
+  - [x] 상세 로깅 추가
+- [x] `hooks/use-follow.ts` Hook 생성
+  - [x] Optimistic update (즉시 UI 업데이트)
+  - [x] API 실패 시 롤백 처리
+  - [x] 팔로워 수 업데이트
+  - [x] 로딩 및 에러 상태 관리
+  - [x] 성공 콜백 지원
+- [x] 팔로우/언팔로우 버튼 구현
+  - [x] 미팔로우: "팔로우" 버튼 (파란색 #0095f6)
+  - [x] 팔로우 중: "팔로잉" 버튼 (회색)
+  - [x] Hover 시: "언팔로우" 표시 (빨간 테두리)
+  - [x] 클릭 시 즉시 API 호출 → UI 업데이트
+  - [x] 로딩 중 버튼 비활성화
+  - [x] ProfileHeader에 통합
+  - [x] 프로필 업데이트 콜백 (팔로워 수 실시간 업데이트)
 
 ### 3-4. 게시물 상세 모달/페이지
 - [ ] `components/post/PostModal.tsx` 컴포넌트 (Desktop)
@@ -523,4 +537,18 @@ Instagram UI 기반 SNS 프로젝트 개발 체크리스트
   - 사용자 필터링 시 페이지네이션 정확히 동작
   - 로딩 스켈레톤 및 빈 상태 처리
   - "더 보기" 버튼 (무한 스크롤 대안)
+  - 상세 로깅 추가
+- ✅ 3-3 팔로우 기능 완료
+  - POST /api/follows API 구현 (팔로우 추가)
+  - DELETE /api/follows API 구현 (언팔로우)
+  - Clerk 인증 및 사용자 ID 변환
+  - 중복 팔로우 방지 (UNIQUE 제약조건)
+  - 자기 자신 팔로우 방지
+  - useFollow Hook 생성 (optimistic update)
+  - ProfileHeader에 팔로우 버튼 통합
+  - 미팔로우: "팔로우" 버튼 (파란색 #0095f6)
+  - 팔로우 중: "팔로잉" 버튼 (회색)
+  - Hover 시 "언팔로우" 표시 (빨간 테두리)
+  - 팔로워 수 실시간 업데이트
+  - 로딩 상태 및 에러 처리
   - 상세 로깅 추가

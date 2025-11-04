@@ -111,9 +111,15 @@ export default function ProfilePage() {
     );
   }
 
+  // 프로필 업데이트 핸들러 (팔로우 상태 변경 시)
+  const handleProfileUpdate = (updatedProfile: UserProfile) => {
+    console.log("프로필 업데이트:", updatedProfile);
+    setProfile(updatedProfile);
+  };
+
   return (
     <div className="w-full bg-[#FAFAFA] min-h-screen">
-      <ProfileHeader profile={profile} />
+      <ProfileHeader profile={profile} onProfileUpdate={handleProfileUpdate} />
       
       {/* 게시물 그리드 */}
       <PostGrid userId={userId} />

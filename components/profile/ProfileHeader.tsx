@@ -21,13 +21,36 @@ import { useUser } from "@clerk/nextjs";
 import Image from "next/image";
 import { UserProfile } from "@/lib/types";
 import { User } from "lucide-react";
+import { useFollow } from "@/hooks/use-follow";
+import { useState } from "react";
 
 interface ProfileHeaderProps {
   profile: UserProfile;
+  onProfileUpdate?: (updatedProfile: UserProfile) => void; // 프로필 업데이트 콜백
 }
 
-export default function ProfileHeader({ profile }: ProfileHeaderProps) {
+export default function ProfileHeader({ profile, onProfileUpdate }: ProfileHeaderProps) {
   const { user: clerkUser } = useUser();
+  const [isHoveringFollow, setIsHoveringFollow] = useState(false);
+
+  // 팔로우 Hook (Hook 규칙 때문에 항상 호출)
+  // 본인 프로필일 때는 버튼이 렌더링되지 않으므로 실제로 사용되지 않음
+  const { isFollowing, followersCount, toggleFollow, isLoading } = useFollow({
+    followingId: profile.clerk_id,
+    initialFollowing: profile.isFollowing || false,
+    initialFollowersCount: profile.followers_count,
+    onSuccess: (newFollowingState) => {
+      console.log("팔로우 상태 변경 성공:", newFollowingState);
+      // 프로필 업데이트 콜백 호출
+      if (onProfileUpdate && !profile.isOwnProfile) {
+        onProfileUpdate({
+          ...profile,
+          isFollowing: newFollowingState,
+          followers_count: followersCount,
+        });
+      }
+    },
+  });
 
   console.group("ProfileHeader 렌더링");
   console.log("프로필 정보:", {
@@ -38,6 +61,11 @@ export default function ProfileHeader({ profile }: ProfileHeaderProps) {
     following_count: profile.following_count,
     isFollowing: profile.isFollowing,
     isOwnProfile: profile.isOwnProfile,
+  });
+  console.log("팔로우 Hook 상태:", {
+    isFollowing,
+    followersCount,
+    isLoading,
   });
   console.log("Clerk 사용자:", clerkUser ? { id: clerkUser.id } : "없음");
   console.groupEnd();
@@ -101,19 +129,17 @@ export default function ProfileHeader({ profile }: ProfileHeaderProps) {
                 <button
                   type="button"
                   className={`px-4 py-1.5 text-sm font-semibold rounded-md transition-colors ${
-                    profile.isFollowing
+                    isFollowing
                       ? "text-[#262626] bg-white border border-[#DBDBDB] hover:border-[#ED4956] hover:text-[#ED4956]"
                       : "text-white bg-[#0095f6] hover:bg-[#1877f2]"
                   }`}
-                  aria-label={profile.isFollowing ? "언팔로우" : "팔로우"}
-                  onClick={() => {
-                    console.log(
-                      profile.isFollowing ? "언팔로우 클릭" : "팔로우 클릭"
-                    );
-                    // TODO: 3-3 단계에서 팔로우 기능 구현
-                  }}
+                  aria-label={isFollowing ? "언팔로우" : "팔로우"}
+                  disabled={isLoading}
+                  onMouseEnter={() => setIsHoveringFollow(true)}
+                  onMouseLeave={() => setIsHoveringFollow(false)}
+                  onClick={toggleFollow}
                 >
-                  {profile.isFollowing ? "팔로잉" : "팔로우"}
+                  {isHoveringFollow && isFollowing ? "언팔로우" : isFollowing ? "팔로잉" : "팔로우"}
                 </button>
                 <button
                   type="button"
@@ -144,7 +170,7 @@ export default function ProfileHeader({ profile }: ProfileHeaderProps) {
               }}
             >
               <span className="font-semibold text-[#262626]">
-                {profile.followers_count}
+                {profile.isOwnProfile ? profile.followers_count : followersCount}
               </span>
               <span className="text-[#262626]">팔로워</span>
             </button>
