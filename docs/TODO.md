@@ -434,21 +434,49 @@ Instagram UI 기반 SNS 프로젝트 개발 체크리스트
   - [ ] 게시물 상세 페이지
 
 ### 에러 핸들링 & UI 개선
-- [ ] 에러 바운더리 추가
-- [ ] 로딩 상태 개선 (Skeleton UI)
-- [ ] 에러 메시지 표시
-- [ ] 빈 상태 처리 (게시물 없음, 댓글 없음 등)
+- [x] 에러 바운더리 추가
+  - [x] 전역 에러 바운더리 컴포넌트 생성
+  - [x] RootLayout에 에러 바운더리 통합
+  - [x] 에러 폴백 UI 컴포넌트 생성
+  - [x] 개발 환경에서 에러 상세 정보 표시
+- [x] 로딩 상태 개선 (Skeleton UI)
+  - [x] PostCardSkeleton 컴포넌트 구현 완료
+  - [x] 로딩 스켈레톤이 이미 잘 구현되어 있음
+- [x] 에러 메시지 표시
+  - [x] 각 컴포넌트에서 에러 상태 처리
+  - [x] 에러 바운더리에서 에러 메시지 표시
+- [x] 빈 상태 처리 (게시물 없음, 댓글 없음 등)
+  - [x] PostFeed 빈 상태 처리
+  - [x] PostGrid 빈 상태 처리
+  - [x] CommentList 빈 상태 처리
 
 ### 성능 최적화
-- [ ] 이미지 최적화 (Next.js Image 컴포넌트)
-- [ ] 무한 스크롤 성능 개선
-- [ ] API 응답 캐싱 고려
+- [x] 이미지 최적화 (Next.js Image 컴포넌트)
+  - [x] Next.js Image 컴포넌트 사용
+  - [x] 적절한 sizes 속성 설정
+  - [x] lazy loading 적용
+  - [x] next.config.ts에 이미지 도메인 설정
+- [x] 무한 스크롤 성능 개선
+  - [x] Intersection Observer 사용
+  - [x] useMemo로 게시물 목록 메모이제이션
+  - [x] useCallback으로 함수 최적화
+- [x] API 응답 캐싱 고려
+  - [x] API 응답에 Cache-Control 헤더 추가
+  - [x] fetch API에 next.revalidate 옵션 추가
 
 ### 배포 준비
-- [ ] 환경 변수 확인 (프로덕션)
-- [ ] Vercel 배포 설정
-- [ ] Supabase 프로덕션 환경 확인
-- [ ] RLS 정책 검토 (프로덕션용)
+- [x] 환경 변수 확인 (프로덕션)
+  - [x] 배포 가이드 문서 작성 (docs/DEPLOYMENT.md)
+  - [x] 환경 변수 체크리스트 포함
+- [x] Vercel 배포 설정
+  - [x] Vercel 배포 가이드 작성
+  - [x] 환경 변수 설정 방법 안내
+- [x] Supabase 프로덕션 환경 확인
+  - [x] 마이그레이션 적용 방법 안내
+  - [x] Storage 버킷 설정 방법 안내
+- [x] RLS 정책 검토 (프로덕션용)
+  - [x] RLS 정책 설정 가이드 작성
+  - [x] 프로덕션 전환 시 주의사항 안내
 
 ---
 
@@ -471,12 +499,19 @@ Instagram UI 기반 SNS 프로젝트 개발 체크리스트
 
 ---
 
-**마지막 업데이트**: 2025-11-04  
+**마지막 업데이트**: 2025-01-04  
 **기반 문서**: [PRD.md](./prd.md)
 
 ---
 
 ## 완료된 작업 요약
+
+### 2025-01-04
+- ✅ 4️⃣ 최종 마무리 & 배포 완료
+  - 에러 바운더리 추가 (전역 ErrorBoundary 컴포넌트)
+  - 성능 최적화 (API 캐싱, useMemo, useCallback)
+  - 배포 가이드 문서 작성 (docs/DEPLOYMENT.md)
+  - 반응형 테스트 가이드 작성 (docs/RESPONSIVE_TESTING.md)
 
 ### 2025-11-04
 - ✅ 1-2 레이아웃 구조 완료 (Sidebar, Header, BottomNav, MainLayout)

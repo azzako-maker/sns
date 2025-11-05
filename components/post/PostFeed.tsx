@@ -17,7 +17,7 @@
  * - app/api/posts: 게시물 목록 API
  */
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import PostCard from "./PostCard";
 import PostCardSkeleton from "./PostCardSkeleton";
 import { PostWithComments, PostsResponse } from "@/lib/types";
@@ -47,7 +47,10 @@ export default function PostFeed() {
       console.group("📤 게시물 목록 API 호출");
       console.log("- 페이지:", pageNum);
 
-      const response = await fetch(`/api/posts?page=${pageNum}`);
+      // API 응답 캐싱 (브라우저 캐시 활용)
+      const response = await fetch(`/api/posts?page=${pageNum}`, {
+        next: { revalidate: 60 }, // 60초마다 재검증
+      });
       
       console.log("📥 API 응답 상태:", response.status);
 
@@ -201,12 +204,16 @@ export default function PostFeed() {
     );
   }
 
+  // 게시물 목록 메모이제이션 (성능 최적화)
+  const postCards = useMemo(
+    () => posts.map((post) => <PostCard key={post.id} post={post} />),
+    [posts]
+  );
+
   return (
     <div className="space-y-4">
       {/* 게시물 목록 */}
-      {posts.map((post) => (
-        <PostCard key={post.id} post={post} />
-      ))}
+      {postCards}
 
       {/* 추가 로딩 스켈레톤 */}
       {isLoadingMore && (

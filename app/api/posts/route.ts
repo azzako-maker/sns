@@ -265,13 +265,19 @@ export async function GET(request: NextRequest) {
     console.log("전체 게시물 수:", totalPosts, "더 불러올 게시물:", hasMore);
     console.groupEnd();
 
+    // API 응답 캐싱 설정 (60초)
     return NextResponse.json<PostsResponse>(
       {
         posts: postsWithComments,
         hasMore,
         page,
       },
-      { status: 200 }
+      {
+        status: 200,
+        headers: {
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+        },
+      }
     );
   } catch (error) {
     console.error("❌ 게시물 목록 API 에러:", error);
