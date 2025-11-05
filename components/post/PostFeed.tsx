@@ -160,6 +160,12 @@ export default function PostFeed() {
     };
   }, [hasMore, loading, isLoadingMore, loadMore]);
 
+  // 게시물 목록 메모이제이션 (성능 최적화) - 모든 early return 이전에 위치
+  const postCards = useMemo(
+    () => posts.map((post) => <PostCard key={post.id} post={post} />),
+    [posts]
+  );
+
   // 로딩 상태
   if (loading && posts.length === 0) {
     return (
@@ -203,12 +209,6 @@ export default function PostFeed() {
       </div>
     );
   }
-
-  // 게시물 목록 메모이제이션 (성능 최적화)
-  const postCards = useMemo(
-    () => posts.map((post) => <PostCard key={post.id} post={post} />),
-    [posts]
-  );
 
   return (
     <div className="space-y-4">
